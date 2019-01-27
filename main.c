@@ -1,7 +1,7 @@
 #include"okna.h"
 
 #define CZAS_ODKRYCIA 500
-
+#define MAKS_DL_TEKSTU 1000
 static Dane info;
 bool aktywna;
 static GtkWidget *window;
@@ -14,7 +14,24 @@ void pokazBlad(char *komunikat){
     gtk_widget_destroy (dialog);
 }
 void zakoncz(){ closePipes(info.potoki); gtk_main_quit(); return;}
-void zakoncz2(){aktywna = 0;}
+void zakoncz2(){
+	FILE *fptr;
+	char tekst[MAKS_DL_TEKSTU+5];
+	char sl[11];
+	sprintf(sl,"zapis%d.txt",info.n);
+	printf("%d",info.n);;
+	fptr = fopen(sl,"w");
+	sprintf(tekst,"%d %d %d %d %d",info.ruchy,info.n,info.punktyA,info.punktyB,info.ruchgracza);
+	for(int g=0;g<info.n;g++)
+		for(int h=0;h<info.n;h++)
+			sprintf(tekst,"%s %d",tekst,info.przyc[g][h].obraz);
+	for(int g=0;g<info.n;g++)
+		for(int h=0;h<info.n;h++)
+			sprintf(tekst,"%s %d",tekst,info.przyc[g][h].odkryty);
+	fprintf(fptr,"%s",tekst);
+	fclose(fptr);
+	aktywna = 0;
+}
 
 
 void nowa_gra(){
