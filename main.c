@@ -1,28 +1,31 @@
 #include"okna.h"
 
+#define CZAS_ODKRYCIA 500
+
 static Dane info;
 bool aktywna;
 static GtkWidget *window;
 
-void pokazBlad(char *komunikat)
-{
+void pokazBlad(char *komunikat){
     GtkWidget *dialog;
     dialog=gtk_message_dialog_new (GTK_WINDOW(window),GTK_DIALOG_DESTROY_WITH_PARENT,
 				   GTK_MESSAGE_ERROR,GTK_BUTTONS_CLOSE,"%s",komunikat);
     gtk_dialog_run (GTK_DIALOG (dialog));
     gtk_widget_destroy (dialog);
 }
-void zakoncz2(){
-	aktywna = 0;
-}
+void zakoncz(){ closePipes(info.potoki); gtk_main_quit(); return;}
+void zakoncz2(){aktywna = 0;}
+
+
 void nowa_gra(){
 }
-void klikniete(){
-}
+
 void wczytaj_gre(){
 }
 void poddaj_sie(){
 }
+
+static void klikniete(GtkWidget *widget, gpointer *data);
 void stworz_plansze(GtkWidget *widget, gpointer *data);
 
 
@@ -41,7 +44,7 @@ int main(int argc,char *argv[]){
 	gtk_window_set_position	(GTK_WINDOW(window),GTK_WIN_POS_CENTER);
 	gtk_container_set_border_width( GTK_CONTAINER(window), 10);
 	gtk_window_set_default_size(GTK_WINDOW(window),400,600);
-	g_signal_connect(G_OBJECT(window),"destroy",G_CALLBACK(zakoncz),NULL);
+	g_signal_connect(G_OBJECT(window),"destroy",G_CALLBACK(zakoncz),&info.potoki);
 
 	GtkWidget *box = gtk_box_new(GTK_ORIENTATION_VERTICAL, 0);
 	gtk_container_add(GTK_CONTAINER(window), box);
@@ -74,6 +77,10 @@ void stworz_plansze(GtkWidget *widget, gpointer *data){
 		return;
 	}
 	info.ruchy=1;
+	info.ruchgracza=0;
+	for(int g=0;g<info.n;g++)
+		for(int h=0;h<info.n;h++)
+			info.przyc[g][h].odkryty=0;
 	aktywna = 1;
 	gchar naglowek[14];
 	info.n = *((int*)data);
@@ -141,5 +148,67 @@ void stworz_plansze(GtkWidget *widget, gpointer *data){
 			gtk_button_set_image(GTK_BUTTON(button),image);
 		}
 	gtk_widget_show_all(window2);
+	return;
+}
+
+
+static void klikniete(GtkWidget *widget, gpointer *data){
+	Przycisk *zm = (Przycisk*) data;
+	if(zm->odkryty || info.gracz!=info.ruchgracza || info.odkryte>=2){
+		return;
+	}
+	odkryj(*zm);
+	zm->odkryty=1;
+	info.ktoreodkryl[info.odkryte]=zm;
+	info.odkryte++;
+	info.ruchy+=2;
+	printf("%d\n",zm->obraz);
+	if(info.odkryte==2){
+		if((info.ktoreodkryl[0])->obraz!=(info.ktoreodkryl[1])->obraz){
+			g_timeout_add(CZAS_ODKRYCIA,zakryj,info.ktoreodkryl[0]);
+			g_timeout_add(CZAS_ODKRYCIA,zakryj,info.ktoreodkryl[1]);
+			(info.ktoreodkryl[1])->odkryty=0;
+			(info.ktoreodkryl[0])->odkryty=0;
+			if(info.ruchgracza==1){
+				gtk_label_set_text(GTK_LABEL(info.mv),"Move:\nPlayer A");
+				info.ruchgracza=0;
+			}
+			else{
+				gtk_label_set_text(GTK_LABEL(info.mv),"Move:\nPlayer B");
+				info.ruchgracza=1;
+			}
+			//przekaz_tekst(1,info);
+		}
+		else{
+			char sl[19];
+			if(info.ruchgracza==1){
+				info.punktyB++;
+				sprintf(sl,"Player B Score:\n%d",info.punktyB);
+				gtk_label_set_text(GTK_LABEL(info.pbs),sl);
+			}
+			else{
+				info.punktyA++;
+				sprintf(sl,"Player A Score:\n%d",info.punktyA);
+				gtk_label_set_text(GTK_LABEL(info.pas),sl);
+			}
+			//przekaz_tekst(0,info);
+		}
+		info.odkryte=0;
+	}
+	else
+	{
+		//przekaz_tekst(0,info);
+	}
+	bool czywygral=0;
+	for(int g=0;g<info.n;g++)
+		for(int h=0;h<info.n;h++){
+			if(info.przyc[g][h].odkryty==0){
+				czywygral=1;
+				break;
+			}
+		}
+	if(czywygral==0)
+		printf("POPUP WYGRALES");
+
 	return;
 }

@@ -10,10 +10,6 @@ void pokaz_instrukcje(GtkWidget *widget, gpointer *data){
 	gtk_widget_show_all(window);
 	return;
 }
-void zakoncz(){
-	gtk_main_quit();
-	return;
-}
 void zamknij(GtkWidget *widget){
 	gtk_window_close(GTK_WINDOW(widget));
 	return;

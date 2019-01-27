@@ -11,7 +11,6 @@ typedef struct dane{
 	GtkWidget *mv,*pas,*pbs;
 	PipesPtr potoki;
 } Dane;
-
 void pokaz_instrukcje(GtkWidget *widget, gpointer *data);
 void zamknij(GtkWidget *widget);
-void zakoncz();
+
