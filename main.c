@@ -1,15 +1,21 @@
 #include"okna.h"
-int gracz;
-GtkWidget *window;
 
-void stworz_plansze(){
+static GtkWidget *window,*window2;
+static Dane info;
 
+void zakoncz2(){
 }
+void nowa_gra(){
+}
+void klikniete(){
+}
+void stworz_plansze(GtkWidget *widget, gpointer *data);
+
 int main(int argc,char *argv[]){
 	gtk_init(&argc,&argv);
 
 	if(argv[1][0] == 'B')
-		gracz=1;
+		info.gracz=1;
 	gchar naglowek[10];
 	sprintf(naglowek,"Player %c",argv[1][0]);
 	window =gtk_window_new(GTK_WINDOW_TOPLEVEL);
@@ -43,4 +49,60 @@ int main(int argc,char *argv[]){
 
 	gtk_main();
 	return 0;
+}
+
+void stworz_plansze(GtkWidget *widget, gpointer *data){
+	gchar naglowek[14];
+	info.n = *((int*)data);
+	gen(info.n,info.przyc,-1);
+	if(info.gracz)
+		sprintf(naglowek,"Memory %dx%d - B",info.n,info.n);
+	else
+		sprintf(naglowek,"Memory %dx%d - A",info.n,info.n);
+
+	window2 =gtk_window_new(GTK_WINDOW_TOPLEVEL);
+	GtkWidget *image,*button;
+
+	gtk_window_set_title(GTK_WINDOW(window2), naglowek);
+	gtk_window_set_position	(GTK_WINDOW(window2),GTK_WIN_POS_CENTER);
+	gtk_container_set_border_width( GTK_CONTAINER(window2), 10);
+
+	g_signal_connect(G_OBJECT(window2),"destroy",G_CALLBACK(zakoncz2), &info);
+
+	GtkWidget *box1 =gtk_box_new(GTK_ORIENTATION_VERTICAL, 0);
+	gtk_container_add(GTK_CONTAINER(window2), box1);
+
+	GtkWidget *box2 = gtk_box_new(GTK_ORIENTATION_HORIZONTAL,2);
+	gtk_box_pack_start(GTK_BOX(box1), box2, TRUE, TRUE, 0);
+	GtkWidget *ng = gtk_button_new_with_label("Nowa gra");
+	g_signal_connect(G_OBJECT(ng),"clicked",G_CALLBACK(nowa_gra),&info);
+	info.mv = gtk_label_new("Move:\nPlayer A");
+	info.pas = gtk_label_new("Player A Score:\n0");
+	info.pbs = gtk_label_new("Player B Score:\n0");
+	gtk_box_pack_start(GTK_BOX(box2), ng, TRUE, TRUE, 0);
+	gtk_box_pack_start(GTK_BOX(box2), info.mv, TRUE, TRUE, 0);
+	gtk_box_pack_start(GTK_BOX(box2), info.pas, TRUE, TRUE, 0);
+	gtk_box_pack_start(GTK_BOX(box2), info.pbs, TRUE, TRUE, 0);
+
+	GtkWidget *grid = gtk_grid_new();
+	gtk_grid_set_row_spacing(GTK_GRID(grid), 0);
+	gtk_grid_set_row_homogeneous(GTK_GRID(grid), TRUE);
+	gtk_grid_set_column_spacing(GTK_GRID(grid), 0);
+	gtk_grid_set_column_homogeneous	(GTK_GRID(grid), TRUE);
+	gtk_box_pack_start(GTK_BOX(box1), grid, TRUE, TRUE, 0);
+
+	for(int g=0;g<info.n;g++)
+		for(int h=0;h<info.n;h++){
+			button = gtk_button_new_with_label(NULL);
+			image = gtk_image_new_from_file("obrazki/tlo.jpeg");
+			info.przyc[g][h].guz=button;
+			info.przyc[g][h].posX=g;
+			info.przyc[g][h].posY=h;
+			info.przyc[g][h].odkryty=0;
+			g_signal_connect(G_OBJECT(button),"clicked",G_CALLBACK(klikniete),&info.przyc[g][h]);
+			gtk_grid_attach(GTK_GRID(grid),button,g,h,1,1);
+			gtk_button_set_image(GTK_BUTTON(button),image);
+		}
+	gtk_widget_show_all(window2);
+	return;
 }
