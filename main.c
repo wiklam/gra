@@ -1,8 +1,17 @@
 #include"okna.h"
 
-static GtkWidget *window,*window2;
 static Dane info;
 bool aktywna;
+static GtkWidget *window;
+
+void pokazBlad(char *komunikat)
+{
+    GtkWidget *dialog;
+    dialog=gtk_message_dialog_new (GTK_WINDOW(window),GTK_DIALOG_DESTROY_WITH_PARENT,
+				   GTK_MESSAGE_ERROR,GTK_BUTTONS_CLOSE,"%s",komunikat);
+    gtk_dialog_run (GTK_DIALOG (dialog));
+    gtk_widget_destroy (dialog);
+}
 void zakoncz2(){
 	aktywna = 0;
 }
@@ -16,7 +25,10 @@ void poddaj_sie(){
 }
 void stworz_plansze(GtkWidget *widget, gpointer *data);
 
+
 int main(int argc,char *argv[]){
+	if ((info.potoki=initPipes(argc,argv)) == NULL)
+	        return 1;
 	gtk_init(&argc,&argv);
 
 	if(argv[1][0] == 'B')
@@ -71,7 +83,7 @@ void stworz_plansze(GtkWidget *widget, gpointer *data){
 	else
 		sprintf(naglowek,"Memory %dx%d - A",info.n,info.n);
 
-	window2 =gtk_window_new(GTK_WINDOW_TOPLEVEL);
+	GtkWidget *window2 =gtk_window_new(GTK_WINDOW_TOPLEVEL);
 	GtkWidget *image,*button;
 
 	gtk_window_set_title(GTK_WINDOW(window2), naglowek);
