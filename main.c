@@ -1,18 +1,8 @@
-#include<stdio.h>
-#include<stdlib.h>
-#include <time.h>
-#include<stdbool.h>
-#include<gtk/gtk.h>
+#include"okna.h"
 int gracz;
 GtkWidget *window;
-void zakoncz(){
-	gtk_main_quit();
-	return;
-}
-void stworz_plansze(){
 
-}
-void pokaz_instrukcje(){
+void stworz_plansze(){
 
 }
 int main(int argc,char *argv[]){
