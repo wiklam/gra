@@ -1,4 +1,5 @@
-#include"okna.h"
+
+#include"gra.h"
 
 #define CZAS_ODKRYCIA 500
 #define MAKS_DL_TEKSTU 1000
@@ -18,7 +19,7 @@ void zakoncz2(){
 	FILE *fptr;
 	char tekst[MAKS_DL_TEKSTU+5];
 	char sl[11];
-	sprintf(sl,"zapis%d.txt",info.n);
+	sprintf(sl,".zapis%d.txt",info.n);
 	printf("%d",info.n);;
 	fptr = fopen(sl,"w");
 	sprintf(tekst,"%d %d %d %d %d",info.ruchy,info.n,info.punktyA,info.punktyB,info.ruchgracza);
@@ -33,9 +34,6 @@ void zakoncz2(){
 	aktywna = 0;
 }
 
-
-void nowa_gra(){
-}
 
 void wczytaj_gre(){
 }
