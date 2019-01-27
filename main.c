@@ -2,12 +2,17 @@
 
 static GtkWidget *window,*window2;
 static Dane info;
-
+bool aktywna;
 void zakoncz2(){
+	aktywna = 0;
 }
 void nowa_gra(){
 }
 void klikniete(){
+}
+void wczytaj_gre(){
+}
+void poddaj_sie(){
 }
 void stworz_plansze(GtkWidget *widget, gpointer *data);
 
@@ -52,6 +57,12 @@ int main(int argc,char *argv[]){
 }
 
 void stworz_plansze(GtkWidget *widget, gpointer *data){
+	if(aktywna){
+		printf("POP UP, ze tylko jedna gra moze byc naraz uruchomiona");
+		return;
+	}
+	info.ruchy=1;
+	aktywna = 1;
 	gchar naglowek[14];
 	info.n = *((int*)data);
 	gen(info.n,info.przyc,-1);
@@ -69,17 +80,17 @@ void stworz_plansze(GtkWidget *widget, gpointer *data){
 
 	g_signal_connect(G_OBJECT(window2),"destroy",G_CALLBACK(zakoncz2), &info);
 
+	GtkWidget *box0 =gtk_box_new(GTK_ORIENTATION_HORIZONTAL, 0);
+	gtk_container_add(GTK_CONTAINER(window2), box0);
+
 	GtkWidget *box1 =gtk_box_new(GTK_ORIENTATION_VERTICAL, 0);
-	gtk_container_add(GTK_CONTAINER(window2), box1);
+	gtk_container_add(GTK_CONTAINER(box0), box1);
 
 	GtkWidget *box2 = gtk_box_new(GTK_ORIENTATION_HORIZONTAL,2);
 	gtk_box_pack_start(GTK_BOX(box1), box2, TRUE, TRUE, 0);
-	GtkWidget *ng = gtk_button_new_with_label("Nowa gra");
-	g_signal_connect(G_OBJECT(ng),"clicked",G_CALLBACK(nowa_gra),&info);
 	info.mv = gtk_label_new("Move:\nPlayer A");
 	info.pas = gtk_label_new("Player A Score:\n0");
 	info.pbs = gtk_label_new("Player B Score:\n0");
-	gtk_box_pack_start(GTK_BOX(box2), ng, TRUE, TRUE, 0);
 	gtk_box_pack_start(GTK_BOX(box2), info.mv, TRUE, TRUE, 0);
 	gtk_box_pack_start(GTK_BOX(box2), info.pas, TRUE, TRUE, 0);
 	gtk_box_pack_start(GTK_BOX(box2), info.pbs, TRUE, TRUE, 0);
@@ -90,6 +101,20 @@ void stworz_plansze(GtkWidget *widget, gpointer *data){
 	gtk_grid_set_column_spacing(GTK_GRID(grid), 0);
 	gtk_grid_set_column_homogeneous	(GTK_GRID(grid), TRUE);
 	gtk_box_pack_start(GTK_BOX(box1), grid, TRUE, TRUE, 0);
+
+	GtkWidget *box3 =gtk_box_new(GTK_ORIENTATION_VERTICAL, 0);
+	GtkWidget *ng = gtk_button_new_with_label("Nowa gra");
+	g_signal_connect(G_OBJECT(ng),"clicked",G_CALLBACK(nowa_gra),&info);
+	GtkWidget *ps = gtk_button_new_with_label("Poddaj sie");
+	g_signal_connect(G_OBJECT(ps),"clicked",G_CALLBACK(poddaj_sie),&info);
+	GtkWidget *wg = gtk_button_new_with_label("Wczytaj gre");
+	g_signal_connect(G_OBJECT(wg),"clicked",G_CALLBACK(wczytaj_gre),&info);
+
+	gtk_box_pack_start(GTK_BOX(box3), ng, TRUE, TRUE, 0);
+	gtk_box_pack_start(GTK_BOX(box3), ps, TRUE, TRUE, 0);
+	gtk_box_pack_start(GTK_BOX(box3), wg, TRUE, TRUE, 0);
+
+	gtk_box_pack_start(GTK_BOX(box0), box3, TRUE, TRUE, 0);
 
 	for(int g=0;g<info.n;g++)
 		for(int h=0;h<info.n;h++){
