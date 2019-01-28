@@ -224,10 +224,12 @@ static void klikniete(GtkWidget *widget, gpointer *data){
 }
 
 gboolean pobierz_tekst(){
-	if(info.n==0)
+	char wejscie[MAKS_DL_TEKSTU+5];
+	if(info.n==0){
+		getStringFromPipe(info.potoki,wejscie,MAKS_DL_TEKSTU);
 		return TRUE;
-	int zliczaj=0;
-	char wejscie[MAKS_DL_TEKSTU+5];															//chyba 342 jest maksymalne
+	}
+	int zliczaj=0;														//chyba 342 jest maksymalne
 	int RUCHY=0,N=0,PUNKTYA=0,PUNKTYB=0,RUCHGRACZA=0,licz=0;
 	int xx=-1,yy=-1,x2=-1,y2=-1;
 	if(getStringFromPipe(info.potoki,wejscie,MAKS_DL_TEKSTU)) {
@@ -333,6 +335,7 @@ gboolean pobierz_tekst(){
 			popup(slowo);
 			przekaz_tekst(2,info);
 			zakoncz2();
+			return TRUE;
 		}
 		if(info.ruchy>RUCHY && RUCHY!=0)															//jesli gracz, ktory wyslal informacje ma mniej ruchow od drugiego gracza uaktualnia informacje zgodne z drugim grazcem (nie liczac rozpoczecia nowej rozgrywki lub wznowienia starej dlatego rozna od zera)
 			przekaz_tekst(0,info);
