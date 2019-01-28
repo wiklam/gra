@@ -1,6 +1,3 @@
-#include<stdio.h>
-#include<stdbool.h>
-#include<gtk/gtk.h>
 #include"plansza.h"
 #include"fifo.h"
 typedef struct dane{
@@ -12,5 +9,4 @@ typedef struct dane{
 	PipesPtr potoki;
 } Dane;
 void pokaz_instrukcje(GtkWidget *widget, gpointer *data);
-void zamknij(GtkWidget *widget);
-
+void zamknij(GtkWidget *widget, gpointer *data);

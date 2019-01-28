@@ -13,7 +13,13 @@ void nowa_gra(GtkWidget *widget, gpointer *data){
 			}
 		}
 	if(czywszystkozakryte){
-		//WYSLIJ KOMUNIKAT ZE NAJPIERW NALEZY DOKONCZYC AKTUALNA ROZGRYWKE LUB SIE PODDAC
+		char tekst[100]="Najpierw nalezy dokonczyc rozgrywke lub sie poddac";
+		popup(tekst);
+		return;
+	}
+	if(wsk->ruchgracza!=wsk->gracz){
+		char tekst[100]="Tylko zwyciezca moze rozpoczac nowa gre";
+		popup(tekst);
 		return;
 	}
 	wsk->punktyA=wsk->punktyB=wsk->odkryte=0;
@@ -25,21 +31,37 @@ void nowa_gra(GtkWidget *widget, gpointer *data){
 			g_timeout_add(1,zakryj,&wsk->przyc[g][h]);
 			(wsk->przyc[g][h]).odkryty=0;
 		}
-		gen(wsk->n,wsk->przyc,-1);
-	for(int g=0;g<wsk->n;g++){
+		gen(wsk->n,wsk->przyc);
+	/*for(int g=0;g<wsk->n;g++){
 		for(int h=0;h<wsk->n;h++){
 			printf("%d ",(wsk->przyc[h][g]).obraz);
 		}
 		printf("\n");
 	}
-	//przekaz_tekst(0,*wsk);
+	*/
+	przekaz_tekst(0,*wsk);
 		return;
 }
-/*
-void przekaz_tekst(bool zak,Dane zm){
+
+void przekaz_tekst(int zak,Dane zm){
 	char tekst[MAKS_DL_TEKSTU+5];
+	if(zak==4){
+		sprintf(tekst,"w");
+		sendStringToPipe(zm.potoki, tekst);
+		return;
+	}
+	if(zak==3){
+		sprintf(tekst,"p");
+		sendStringToPipe(zm.potoki, tekst);
+		return;
+	}
+	if(zak==2){
+		sprintf(tekst,"z");
+		sendStringToPipe(zm.potoki, tekst);
+		return;
+	}
 	if(zak==1){
-		sprintf(tekst,"z%d%d%d%d",(zm.ktoreodkryl[0])->posX,(zm.ktoreodkryl[0])->posY,(zm.ktoreodkryl[1])->posX,(zm.ktoreodkryl[1])->posY);
+		sprintf(tekst,"n%d%d%d%d",(zm.ktoreodkryl[0])->posX,(zm.ktoreodkryl[0])->posY,(zm.ktoreodkryl[1])->posX,(zm.ktoreodkryl[1])->posY);
 		sprintf(tekst,"%s%d %d %d %d %d",tekst,zm.ruchy,zm.n,zm.punktyA,zm.punktyB,zm.ruchgracza);
 	}
 	else
@@ -53,101 +75,121 @@ void przekaz_tekst(bool zak,Dane zm){
 	sendStringToPipe(zm.potoki, tekst);
 	return;
 }
-
-gboolean pobierz_tekst(gpointer data){
-	Dane *zm = (Dane*) data;
-	int zliczaj=0;
-	char wejscie[MAKS_DL_TEKSTU+5];															//chyba 342 jest maksymalne
-	int RUCHY=0,N=0,PUNKTYA=0,PUNKTYB=0,RUCHGRACZA=0,licz=0;
-	int xx=-1,yy=-1,x2=-1,y2=-1;
-	if(getStringFromPipe(zm->potoki,wejscie,MAKS_DL_TEKSTU)) {
-		if(wejscie[0]=='z'){																//jesli przeciwnik odkryl niedobrana pare to po sprawdzeniu pewnych warunkow zostana one zakryte
-			xx=wejscie[1]-'0',yy=wejscie[2]-'0',x2=wejscie[3]-'0',y2=wejscie[4]-'0';
-			licz=5;
-		}																					//z pliku odczytuje informacje o rozgrywce przeciwnika
-		while(wejscie[licz]!=' '){
-			RUCHY=RUCHY*10+wejscie[licz]-'0';
-			licz++;
-		}
-		licz++;
-		N=wejscie[licz]-'0';
-		licz+=2;
-		while(wejscie[licz]!=' '){
-			PUNKTYA=PUNKTYA*10+wejscie[licz]-'0';
-			licz++;
-		}
-		licz++;
-		while(wejscie[licz]!=' '){
-			PUNKTYB=PUNKTYB*10+wejscie[licz]-'0';
-			licz++;
-		}
-		licz++;
-		RUCHGRACZA=wejscie[licz]-'0';
-		licz++;
-		if(N!=zm->n){																			//jesli sa uruchomione naraz rozgrywki dla dwoch roznych plansz zostaja one wylaczone
-			printf("Uruchomiono dwie rozne rozgrywki");
-			przekaz_tekst(0,*zm);
-			zakoncz();
-		}
-		if(zm->ruchy>RUCHY && RUCHY!=0)															//jesli gracz, ktory wyslal informacje ma mniej ruchow od drugiego gracza uaktualnia informacje zgodne z drugim grazcem (nie liczac rozpoczecia nowej rozgrywki lub wznowienia starej dlatego rozna od zera)
-			przekaz_tekst(0,*zm);
-		else{
-			if(zm->ruchy==0 && RUCHY==1)														//jak wznawiam aby plansza ktora wznawiam nie zakryla sie cala
-				return TRUE;
-			for(int g=0;g<N;g++)
-				for(int h=0;h<N;h++){
-					(zm->przyc[g][h]).obraz=0;
-					while(wejscie[licz]==' ')
-						licz++;
-					while(wejscie[licz]!=' '){
-						(zm->przyc[g][h]).obraz=(zm->przyc[g][h]).obraz*10+wejscie[licz]-'0';
-						licz++;
-					}
-				}
-			for(int g=0;g<N;g++)																//uaktualniam plansze graczy
-				for(int h=0;h<N;h++){
-					licz++;
-					(zm->przyc[g][h]).odkryty=wejscie[licz]-'0';
-					if((zm->przyc[g][h]).odkryty || (xx==g && yy==h) || (x2==g && y2==h)){
-						odkryj((zm->przyc[g][h]));
-						zliczaj++;
-					}
-					else
-						g_timeout_add(1,zakryj,&(zm->przyc[g][h]));
-					licz++;
-				}
-			for(int g=0;g<zm->n;g++){
-				for(int h=0;h<zm->n;h++){
-					printf("%d ",(zm->przyc[g][h]).obraz);
-				}
-				printf("\n");
+void poddaj_sie(GtkWidget *widget,gpointer *data){
+	Dane *zm = (Dane *) data;
+	bool czymoge=1;
+	for(int g=0;g<zm->n;g++)
+		for(int h=0;h<zm->n;h++)
+			if(zm->przyc[g][h].odkryty==0){
+				czymoge=0;
+				break;
 			}
-			zm->ruchy=RUCHY;																		//ukatualniam dane
-			zm->punktyA=PUNKTYA;
-			zm->punktyB=PUNKTYB;
-			zm->ruchgracza=RUCHGRACZA;
-			char sl[19];
-			sprintf(sl,"Player A Score:\n%d",zm->punktyA);
-			gtk_label_set_text(GTK_LABEL(zm->pas),sl);
-			sprintf(sl,"Player B Score:\n%d",zm->punktyB);
-			gtk_label_set_text(GTK_LABEL(zm->pbs),sl);
-			if(zm->ruchgracza==0)
-				gtk_label_set_text(GTK_LABEL(zm->mv),"Move:\nPlayer A");
-			else
-				gtk_label_set_text(GTK_LABEL(zm->mv),"Move:\nPlayer B");
-			if(wejscie[0]=='z'){										//zakrywam po jakims czasie zla pare kart, ktora odkryl przeciwnik
-				g_timeout_add(CZAS_ODKRYCIA,zakryj,&zm->przyc[xx][yy]);
-				g_timeout_add(CZAS_ODKRYCIA,zakryj,&zm->przyc[x2][y2]);
-			}
-			if(zliczaj%2==1 && zm->gracz==zm->ruchgracza){
-				zm->odkryte=1;
-				int miejsce=bezpary(zm->przyc,zm->n);
-				zm->ktoreodkryl[0]=&zm->przyc[miejsce%zm->n][miejsce/zm->n];
-				printf("\n znalezione: %d %d\n",(zm->ktoreodkryl[0])->posX,(zm->ktoreodkryl[0])->posY);
-			}
-		}
-		printf("meh %d %d %d %d %d %c\n",RUCHY,N,PUNKTYA,PUNKTYB,RUCHGRACZA,wejscie[0]);
+	if(czymoge){
+		char tekst[100]="Nie mozna poddac zakonczonej rozgrywki";
+		popup(tekst);
+		return;
 	}
-	return TRUE;
+	for(int g=0;g<zm->n;g++)
+		for(int h=0;h<zm->n;h++){
+			odkryj((zm->przyc[g][h]));
+			zm->przyc[g][h].odkryty=1;
+		}
+	zm->ruchy++;
+	if(zm->ruchgracza==zm->gracz)
+		zm->ruchgracza=(zm->gracz+1)%2;
+	if(zm->gracz==0){
+		char tekst[100]="Player B Score:\n";
+		sprintf(tekst,"%s%d",tekst,(zm->n)*(zm->n)/2);
+		zm->punktyB=(zm->n)*(zm->n)/2;
+		zm->punktyA=0;
+		gtk_label_set_text(GTK_LABEL(zm->pas),"Player A Score:\n0");
+		gtk_label_set_text(GTK_LABEL(zm->pbs),tekst);
+	}
+	else{
+		char tekst[100]="Player A Score:\n";
+		sprintf(tekst,"%s%d",tekst,(zm->n)*(zm->n)/2);
+		zm->punktyA=(zm->n)*(zm->n)/2;
+		zm->punktyB=0;
+		gtk_label_set_text(GTK_LABEL(zm->pbs),"Player B Score:\n0");
+		gtk_label_set_text(GTK_LABEL(zm->pas),tekst);
+	}
+	if(zm->ruchgracza==0)
+		gtk_label_set_text(GTK_LABEL(zm->mv),"Move:\nPlayer A");
+	else
+		gtk_label_set_text(GTK_LABEL(zm->mv),"Move:\nPlayer B");
+	przekaz_tekst(3,*zm);
 }
-*/
+void wczytaj_gre(GtkWidget *widget,gpointer *data){
+	Dane *wart = (Dane*) data;
+	bool sprawdz=0;
+	if(wart->ruchy>1){
+		char tekst[100]="Gre mozna wczytac tylko na poczatku";
+		popup(tekst);
+		return;
+	}
+
+	int zliczaj=0;
+	FILE *fptr;
+	char sl[10];
+	int zm;
+	sprintf(sl,".zapis%d.txt",wart->n);
+	fptr = fopen(sl,"r");
+	fscanf(fptr,"%d %d %d %d %d",&wart->ruchy,&wart->n,&wart->punktyA,&wart->punktyB,&zm);
+	wart->ruchgracza=zm;
+	for(int g=0;g<wart->n;g++)
+		for(int h=0;h<wart->n;h++)
+			fscanf(fptr,"%d",&wart->przyc[g][h].obraz);
+	for(int g=0;g<wart->n;g++)
+		for(int h=0;h<wart->n;h++){
+			fscanf(fptr,"%d",&zm);
+			wart->przyc[g][h].odkryty=zm;
+			if(wart->przyc[g][h].odkryty){
+				odkryj(wart->przyc[g][h]);
+				zliczaj++;
+			}
+			else
+				g_timeout_add(1,zakryj,&wart->przyc[g][h]);
+		}
+	if(zliczaj%2==1 && wart->gracz==wart->ruchgracza){
+		wart->odkryte=1;
+		int miejsce=bezpary(wart->przyc,wart->n);
+		wart->ktoreodkryl[0]=&wart->przyc[miejsce%wart->n][miejsce/wart->n];
+	}
+	fclose(fptr);
+	wart->ruchy=0;
+	char wtf[19];
+	sprintf(wtf,"Player A Score:\n%d",wart->punktyA);
+	gtk_label_set_text(GTK_LABEL(wart->pas),wtf);
+	sprintf(wtf,"Player B Score:\n%d",wart->punktyB);
+	gtk_label_set_text(GTK_LABEL(wart->pbs),wtf);
+	if(wart->ruchgracza==0)
+		gtk_label_set_text(GTK_LABEL(wart->mv),"Move:\nPlayer A");
+	else
+		gtk_label_set_text(GTK_LABEL(wart->mv),"Move:\nPlayer B");
+	przekaz_tekst(0,*wart);
+}
+void popup(char *t){
+	GtkWidget *window =gtk_window_new(GTK_WINDOW_TOPLEVEL),*lab,*but;
+	gtk_window_set_title(GTK_WINDOW(window),"Komunikat");
+	gtk_window_set_position	(GTK_WINDOW(window),GTK_WIN_POS_CENTER);
+	gtk_window_set_default_size(GTK_WINDOW(window),200,50);
+	gtk_container_set_border_width( GTK_CONTAINER(window), 10);
+	g_signal_connect(G_OBJECT(window),"destroy",G_CALLBACK(zamknij), window);
+
+	gchar tekst[100];
+	sprintf(tekst,"%s",t);
+
+	GtkWidget *box =gtk_box_new(GTK_ORIENTATION_VERTICAL, 0);
+	lab=gtk_label_new(tekst);
+	GtkWidget *ok = gtk_button_new_with_label("Ok");
+
+	g_signal_connect(G_OBJECT(ok),"clicked",G_CALLBACK(zamknij),window);
+
+
+	gtk_container_add(GTK_CONTAINER(box), lab);
+	gtk_container_add(GTK_CONTAINER(box), ok);
+	gtk_container_add(GTK_CONTAINER(window), box);
+
+	gtk_widget_show_all(window);
+	return;
+}

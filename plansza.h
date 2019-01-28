@@ -10,7 +10,7 @@ typedef struct przycisk{
 	bool odkryty;
 }	Przycisk;
 
-void gen(int n, Przycisk tab[8][8],int ziarno);
+void gen(int n, Przycisk tab[8][8]);
 void odkryj(Przycisk zm);
 gboolean zakryj(gpointer data);
 int bezpary(Przycisk tab[8][8],int x);

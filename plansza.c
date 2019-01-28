@@ -1,12 +1,9 @@
 #include "plansza.h"
 
-void gen(int n, Przycisk tab[8][8],int ziarno){		//funkcja generujaca plansze memory wykorzystujac funkcje rand()
-	int uz[66]={0};		//uz - sprawdzam czy juz wygenerowalem dwie takie liczbe(dwa miejsca dla danej karty)
-	int zm;				//zm - wygenerwowana liczba
-	if(ziarno<0)		//sprawdzam czy podana ziarno, przez ktore ma byc wygenerowana gea
-		srand(time(NULL));
-	else
-		srand(ziarno);
+void gen(int n, Przycisk tab[8][8]){
+	int uz[66]={0};
+	int zm;
+	srand(time(NULL));
 	for(int g=0;g<n;g++)
 		for(int h=0;h<n;h++){
 			zm=rand()%(n*n/2);

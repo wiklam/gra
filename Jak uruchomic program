@@ -1,0 +1,2 @@
+Nalezy skompilowac gre za pomoca make. (Mozna usunac niepotrzebne pliki za pomoca make clean).
+Nastepnie uruchomic program final z odp parametrem A/B w zaleznosc, ktorym graczem chce sie rozpaczac rozgrywke. Instrukcja gry znajduje sie w menu.
