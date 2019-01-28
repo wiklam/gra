@@ -45,7 +45,7 @@ int main(int argc,char *argv[]){
 	GtkWidget *mm = gtk_button_new_with_label("Poziom:\nMedium - 6 x 6");
 	GtkWidget *hh = gtk_button_new_with_label("Poziom:\nHard - 8 x 8");
 	GtkWidget *ii = gtk_button_new_with_label("Instrukcja");
-	int e=2,m=4,h=6;
+	int e=4,m=6,h=8;
 	g_signal_connect(G_OBJECT(ee),"clicked",G_CALLBACK(stworz_plansze),&e);
 	g_signal_connect(G_OBJECT(mm),"clicked",G_CALLBACK(stworz_plansze),&m);
 	g_signal_connect(G_OBJECT(hh),"clicked",G_CALLBACK(stworz_plansze),&h);
@@ -151,7 +151,6 @@ static void klikniete(GtkWidget *widget, gpointer *data){
 	info.ktoreodkryl[info.odkryte]=zm;
 	info.odkryte++;
 	info.ruchy+=2;
-	//printf("%d\n",zm->obraz);
 	if(info.odkryte==2){
 		if((info.ktoreodkryl[0])->obraz!=(info.ktoreodkryl[1])->obraz){
 			g_timeout_add(CZAS_ODKRYCIA,zakryj,info.ktoreodkryl[0]);
@@ -189,8 +188,30 @@ static void klikniete(GtkWidget *widget, gpointer *data){
 					}
 				}
 			if(czywygral==0){
-				char slowo[100]="Wygrales gre :)";
-				popup(slowo);
+				if(info.gracz==0){
+					if(info.punktyA>info.punktyB){
+						char slowo[100]="Wygrales :D";
+						popup(slowo);
+					}
+					if(info.punktyA<info.punktyB){
+						char slowo[100]="Przegrales :(";
+						popup(slowo);
+					}
+				}
+				else{
+					if(info.punktyA<info.punktyB){
+						char slowo[100]="Wygrales :D";
+						popup(slowo);
+					}
+					if(info.punktyA>info.punktyB){
+						char slowo[100]="Przegrales :(";
+						popup(slowo);
+					}
+				}
+				if(info.punktyA==info.punktyB){
+					char slowo[100]="Remis!!!";
+					popup(slowo);
+				}
 				przekaz_tekst(4,info);
 			}
 			przekaz_tekst(0,info);
@@ -255,8 +276,34 @@ gboolean pobierz_tekst(){
 					odkryj((info.przyc[g][h]));
 					info.przyc[g][h].odkryty=1;
 				}
-			char slowo[100]="Przegrales gre :(";
-			popup(slowo);
+				if(info.gracz==0){
+					if(info.punktyA>(info.n)*(info.n)/2-info.punktyA){
+						char slowo[100]="Wygrales :D";
+						popup(slowo);
+					}
+					if(info.punktyA<(info.n)*(info.n)/2-info.punktyA){
+						char slowo[100]="Przegrales :(";
+						popup(slowo);
+					}
+					if(info.punktyA==(info.n)*(info.n)/2-info.punktyA){
+						char slowo[100]="Remis!!!";
+						popup(slowo);
+					}
+				}
+				else{
+					if((info.n)*(info.n)/2-info.punktyB<info.punktyB){
+						char slowo[100]="Wygrales :D";
+						popup(slowo);
+					}
+					if((info.n)*(info.n)/2-info.punktyB>info.punktyB){
+						char slowo[100]="Przegrales :(";
+						popup(slowo);
+					}
+					if(info.punktyB==(info.n)*(info.n)/2-info.punktyB){
+						char slowo[100]="Remis!!!";
+						popup(slowo);
+					}
+				}
 		}
 		if(wejscie[0]=='n'){															//jesli przeciwnik odkryl niedobrana pare to po sprawdzeniu pewnych warunkow zostana one zakryte
 			xx=wejscie[1]-'0',yy=wejscie[2]-'0',x2=wejscie[3]-'0',y2=wejscie[4]-'0';
@@ -345,7 +392,6 @@ void zakoncz2(){
 	char tekst[MAKS_DL_TEKSTU+5];
 	char sl[11];
 	sprintf(sl,".zapis%d.txt",info.n);
-	printf("%d",info.n);;
 	fptr = fopen(sl,"w");
 	sprintf(tekst,"%d %d %d %d %d",info.ruchy,info.n,info.punktyA,info.punktyB,info.ruchgracza);
 	for(int g=0;g<info.n;g++)

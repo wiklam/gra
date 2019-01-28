@@ -24,7 +24,6 @@ void odkryj(Przycisk zm){
 	a/=10;
 	if(a>0)
 		S[8]+=(a%10);
-	//printf("%d %s\n",a,S);
 	GtkWidget *image = gtk_image_new_from_file(S);
 	gtk_button_set_image(GTK_BUTTON(zm.guz),image);
 	return;

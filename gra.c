@@ -18,7 +18,7 @@ void nowa_gra(GtkWidget *widget, gpointer *data){
 		return;
 	}
 	if(wsk->ruchgracza!=wsk->gracz){
-		char tekst[100]="Tylko zwyciezca moze rozpoczac nowa gre";
+		char tekst[100]="Tylko zwyciezca moze rozpoczac nowa gre lub osoba ktora doprowadzila do remisu";
 		popup(tekst);
 		return;
 	}
@@ -32,13 +32,6 @@ void nowa_gra(GtkWidget *widget, gpointer *data){
 			(wsk->przyc[g][h]).odkryty=0;
 		}
 		gen(wsk->n,wsk->przyc);
-	/*for(int g=0;g<wsk->n;g++){
-		for(int h=0;h<wsk->n;h++){
-			printf("%d ",(wsk->przyc[h][g]).obraz);
-		}
-		printf("\n");
-	}
-	*/
 	przekaz_tekst(0,*wsk);
 		return;
 }
@@ -124,6 +117,17 @@ void wczytaj_gre(GtkWidget *widget,gpointer *data){
 	bool sprawdz=0;
 	if(wart->ruchy>1){
 		char tekst[100]="Gre mozna wczytac tylko na poczatku";
+		popup(tekst);
+		return;
+	}
+	for(int g=0;g<wart->n;g++)
+		for(int h=0;h<wart->n;h++)
+			if(wart->przyc[g][h].odkryty==1){
+				sprawdz=1;
+				break;
+			}
+	if(sprawdz){
+		char tekst[100]="Gre mozna wczytac tylko na poczatku rozgrywki";
 		popup(tekst);
 		return;
 	}
